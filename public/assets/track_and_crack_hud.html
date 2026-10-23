@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Track and Crack - Zero-Gravity Telemetry HUD</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.6)); }
+      50% { opacity: 1; filter: drop-shadow(0 0 24px rgba(0, 240, 255, 0.95)); }
+    }
+    @keyframes rotate-ring {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes rotate-ring-rev {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+    .hud-glow {
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.15), inset 0 0 20px rgba(0, 240, 255, 0.05);
+    }
+    .card-hud {
+      background: rgba(8, 16, 32, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      backdrop-filter: blur(12px);
+    }
+    .card-hud:hover {
+      border-color: rgba(0, 240, 255, 0.6);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+    }
+    .text-cyan-glow {
+      color: #00F0FF;
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.7);
+    }
+    .text-amber-glow {
+      color: #FFB800;
+      text-shadow: 0 0 8px rgba(255, 184, 0, 0.7);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans p-4 md:p-6 min-h-screen">
+
+  <div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- TOP TELEMETRY BAR -->
+    <header class="card-hud rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 hud-glow">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400 flex items-center justify-center animate-pulse">
+          <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-lg font-bold tracking-wider text-cyan-glow uppercase">Track & Crack</h1>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">SYS-ZERO-G v4.2</span>
+          </div>
+          <p class="text-xs text-slate-400 font-mono">HAB-ORBITAL // SECTOR 04 • CREW: SPECIALIST K. CHEN</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-6 text-xs font-mono">
+        <div class="hidden sm:block">
+          <span class="text-slate-400">ORBIT SYNC:</span>
+          <span class="text-cyan-300 ml-1 font-bold">16x SUNRISES/24H</span>
+        </div>
+        <div>
+          <span class="text-slate-400">ATMOSPHERE:</span>
+          <span class="text-emerald-400 ml-1 font-bold">101.3 kPa [NOMINAL]</span>
+        </div>
+        <div class="flex items-center space-x-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span class="text-emerald-400 font-bold">TELEMETRY LIVE</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CORE HERO: HOLOGRAPHIC GRAVITY SCORE ENGINE -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- GRAVITY REACTOR GAUGE -->
+      <div class="lg:col-span-5 card-hud rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden hud-glow text-center">
+        <div class="absolute -top-12 -left-12 w-36 h-36 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-12 -right-12 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="text-xs font-mono uppercase text-slate-400 tracking-widest mb-3">Centrifugal Resistance Index</div>
+
+        <!-- Animated Holographic Ring -->
+        <div class="relative w-56 h-56 flex items-center justify-center my-2">
+          <!-- Outer rotating dotted ring -->
+          <svg class="absolute inset-0 w-full h-full" style="animation: rotate-ring 25s linear infinite;" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(0, 240, 255, 0.2)" stroke-width="2" stroke-dasharray="4 8" />
+          </svg>
+          <!-- Middle rotating segmented ring -->
+          <svg class="absolute inset-0 w-full h-full" style="animation: rotate-ring-rev 15s linear infinite;" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="76" fill="none" stroke="rgba(255, 184, 0, 0.4)" stroke-width="3" stroke-dasharray="16 12 8 12" />
+          </svg>
+          <!-- Progress Arc -->
+          <svg class="w-48 h-48 transform -rotate-90" viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r="64" fill="none" stroke="#1e293b" stroke-width="10" />
+            <circle id="gravityCircle" cx="80" cy="80" r="64" fill="none" stroke="#00F0FF" stroke-width="10" 
+              stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="48" class="transition-all duration-700" />
+          </svg>
+
+          <!-- Core Numbers -->
+          <div class="absolute flex flex-col items-center justify-center">
+            <span class="text-xs text-cyan-300 font-mono tracking-wider">GRAVITY SCORE</span>
+            <div class="flex items-baseline space-x-0.5">
+              <span id="gravityScoreVal" class="text-4xl font-extrabold text-cyan-glow tracking-tight">0.88</span>
+              <span class="text-xl font-bold text-amber-glow">G</span>
+            </div>
+            <span id="gravityTier" class="text-xs font-bold px-2 py-0.5 mt-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 tracking-wider">
+              ORBITAL LOCK
+            </span>
+          </div>
+        </div>
+
+        <div class="w-full mt-4 pt-4 border-t border-slate-800 flex justify-between items-center text-xs font-mono">
+          <div class="text-left">
+            <div class="text-slate-400">CRACK STATUS</div>
+            <div id="crackStatusText" class="text-emerald-400 font-semibold">Tier 4 / Deep Orbit</div>
+          </div>
+          <div class="text-right">
+            <div class="text-slate-400">ATROPHY MITIGATION</div>
+            <div id="atrophyText" class="text-cyan-300 font-semibold">92.4% Efficacy</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REAL-TIME 4 VITALS MATRIX -->
+      <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <!-- 1. HEART RATE & CEPHALIC SHIFT -->
+        <div class="card-hud rounded-xl p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/30">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+              </span>
+              <span class="text-xs font-bold tracking-wider text-slate-300">CARDIAC TELEMETRY</span>
+            </div>
+            <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">STABLE</span>
+          </div>
+
+          <div class="my-3 flex items-baseline justify-between">
+            <div>
+              <span id="hrDisplay" class="text-3xl font-extrabold text-cyan-glow">84</span>
+              <span class="text-xs text-slate-400 font-mono ml-1">BPM</span>
+            </div>
+            <div class="text-right text-xs font-mono text-slate-400">
+              <div>PULSE WAVE: <span class="text-cyan-300">6.2 m/s</span></div>
+              <div>FLUID SHIFT: <span class="text-amber-400">COMPENSATED</span></div>
+            </div>
+          </div>
+
+          <!-- Pulsing Live ECG wave -->
+          <div class="h-10 bg-slate-900/60 rounded border border-slate-800 p-1 flex items-center overflow-hidden">
+            <svg class="w-full h-8 text-rose-500" viewBox="0 0 200 40" fill="none">
+              <path id="ecgPath" d="M 0 20 L 30 20 L 40 10 L 50 35 L 60 5 L 70 25 L 80 20 L 120 20 L 130 10 L 140 35 L 150 5 L 160 25 L 170 20 L 200 20" 
+                stroke="#00F0FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 2. ORBITAL SLEEP & CIRCADIAN LOCK -->
+        <div class="card-hud rounded-xl p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+              </span>
+              <span class="text-xs font-bold tracking-wider text-slate-300">CIRCADIAN SYNC</span>
+            </div>
+            <span class="text-xs font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">REM PHASE</span>
+          </div>
+
+          <div class="my-3 flex items-baseline justify-between">
+            <div>
+              <span id="sleepDisplay" class="text-3xl font-extrabold text-indigo-300">7.6</span>
+              <span class="text-xs text-slate-400 font-mono ml-1">HOURS</span>
+            </div>
+            <div class="text-right text-xs font-mono text-slate-400">
+              <div>DEEP RECOVERY: <span class="text-indigo-400">2h 15m</span></div>
+              <div>CHRONO-EFFICIENCY: <span class="text-cyan-300">94%</span></div>
+            </div>
+          </div>
+
+          <div class="h-10 bg-slate-900/60 rounded border border-slate-800 p-1.5 flex items-center gap-1">
+            <div class="h-full rounded bg-indigo-900/70 w-2/12" title="Light Sleep"></div>
+            <div class="h-full rounded bg-indigo-500 w-4/12" title="Deep Sleep"></div>
+            <div class="h-full rounded bg-cyan-400 w-3/12" title="REM Cycle"></div>
+            <div class="h-full rounded bg-indigo-700 w-3/12" title="Light Stage"></div>
+          </div>
+        </div>
+
+        <!-- 3. OSMOTIC & HYDRATION BALANCE -->
+        <div class="card-hud rounded-xl p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+              </span>
+              <span class="text-xs font-bold tracking-wider text-slate-300">OSMOTIC HYDRATION</span>
+            </div>
+            <span class="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">TARGET: 2800 mL</span>
+          </div>
+
+          <div class="my-3 flex items-baseline justify-between">
+            <div>
+              <span id="hydrationDisplay" class="text-3xl font-extrabold text-cyan-glow">2,450</span>
+              <span class="text-xs text-slate-400 font-mono ml-1">mL</span>
+            </div>
+            <div class="text-right text-xs font-mono text-slate-400">
+              <div>ELECTROLYTE: <span class="text-emerald-400">OPTIMAL</span></div>
+              <div>PLASMA VOLUME: <span class="text-cyan-300">+2.1%</span></div>
+            </div>
+          </div>
+
+          <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-slate-800">
+            <div id="hydrationProgressBar" class="bg-gradient-to-r from-cyan-600 to-cyan-300 h-2.5 rounded-full transition-all duration-500" style="width: 87%"></div>
+          </div>
+        </div>
+
+        <!-- 4. NEURO-VESTIBULAR & STRESS (HRV) -->
+        <div class="card-hud rounded-xl p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+              </span>
+              <span class="text-xs font-bold tracking-wider text-slate-300">NEURO-VESTIBULAR (SAS)</span>
+            </div>
+            <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">LOW STRESS</span>
+          </div>
+
+          <div class="my-3 flex items-baseline justify-between">
+            <div>
+              <span id="stressDisplay" class="text-3xl font-extrabold text-amber-glow">22</span>
+              <span class="text-xs text-slate-400 font-mono ml-1">/ 100 IDX</span>
+            </div>
+            <div class="text-right text-xs font-mono text-slate-400">
+              <div>HRV RMSSD: <span class="text-emerald-400">68 ms</span></div>
+              <div>OTOLITH DRIFT: <span class="text-cyan-300">0.02%</span></div>
+            </div>
+          </div>
+
+          <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-slate-800">
+            <div id="stressProgressBar" class="bg-gradient-to-r from-emerald-500 via-amber-400 to-rose-500 h-2.5 rounded-full transition-all duration-500" style="width: 22%"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- INTERACTIVE SIMULATION CONSOLE -->
+    <div class="card-hud rounded-2xl p-6 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div>
+          <h2 class="text-sm font-bold tracking-wider text-cyan-glow uppercase">Telemetry Simulator & Training Controls</h2>
+          <p class="text-xs text-slate-400">Adjust cadet vitals to observe dynamic real-time Gravity Score calculation and status changes.</p>
+        </div>
+        <button id="resetTelemetryBtn" class="text-xs px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30 transition font-mono">
+          Reset Telemetry
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Control 1 -->
+        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+          <div class="flex justify-between text-xs font-mono mb-2">
+            <span class="text-slate-400">Resting Heart Rate</span>
+            <span id="sliderHrVal" class="text-cyan-300 font-bold">84 BPM</span>
+          </div>
+          <input type="range" id="inputHr" min="50" max="140" value="84" class="w-full accent-cyan-400 cursor-pointer">
+        </div>
+
+        <!-- Control 2 -->
+        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+          <div class="flex justify-between text-xs font-mono mb-2">
+            <span class="text-slate-400">Sleep Duration</span>
+            <span id="sliderSleepVal" class="text-cyan-300 font-bold">7.6 hrs</span>
+          </div>
+          <input type="range" id="inputSleep" min="3" max="10" step="0.2" value="7.6" class="w-full accent-cyan-400 cursor-pointer">
+        </div>
+
+        <!-- Control 3 -->
+        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+          <div class="flex justify-between text-xs font-mono mb-2">
+            <span class="text-slate-400">Hydration Intake</span>
+            <span id="sliderHydrVal" class="text-cyan-300 font-bold">2450 mL</span>
+          </div>
+          <input type="range" id="inputHydr" min="800" max="4000" step="50" value="2450" class="w-full accent-cyan-400 cursor-pointer">
+        </div>
+
+        <!-- Control 4 -->
+        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+          <div class="flex justify-between text-xs font-mono mb-2">
+            <span class="text-slate-400">Neuro Stress Level</span>
+            <span id="sliderStressVal" class="text-amber-300 font-bold">22 IDX</span>
+          </div>
+          <input type="range" id="inputStress" min="5" max="95" value="22" class="w-full accent-amber-400 cursor-pointer">
+        </div>
+      </div>
+    </div>
+
+    <!-- DAILY "CRACK THE VOID" MISSIONS -->
+    <div class="card-hud rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-sm font-bold tracking-wider text-amber-glow uppercase">Daily "Crack" Missions — Orbital Readiness</h2>
+          <p class="text-xs text-slate-400">Complete anti-atrophy micro-routines to elevate G-Score past atmospheric threshold.</p>
+        </div>
+        <span class="text-xs font-mono text-cyan-300 bg-cyan-900/40 px-2.5 py-1 rounded border border-cyan-500/30">BONUS: +0.12G TODAY</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-slate-900/60 p-3 rounded-xl border border-emerald-500/30 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-bold text-slate-200">ARED Resistance Protocol</div>
+            <div class="text-xs text-slate-400 font-mono">15m Centrifuge Squats</div>
+          </div>
+          <span class="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 font-bold">CRACKED</span>
+        </div>
+
+        <div class="bg-slate-900/60 p-3 rounded-xl border border-cyan-500/30 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-bold text-slate-200">Electrolyte Osmosis Push</div>
+            <div class="text-xs text-slate-400 font-mono">500ml Saline Bolus</div>
+          </div>
+          <span class="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 font-bold">CRACKED</span>
+        </div>
+
+        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-bold text-slate-200">Vestibular Calibration</div>
+            <div class="text-xs text-slate-400 font-mono">5m Saccadic Focus</div>
+          </div>
+          <button class="text-xs px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/40 font-bold transition">
+            INITIATE
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const inputHr = document.getElementById('inputHr');
+    const inputSleep = document.getElementById('inputSleep');
+    const inputHydr = document.getElementById('inputHydr');
+    const inputStress = document.getElementById('inputStress');
+
+    const hrDisplay = document.getElementById('hrDisplay');
+    const sleepDisplay = document.getElementById('sleepDisplay');
+    const hydrationDisplay = document.getElementById('hydrationDisplay');
+    const stressDisplay = document.getElementById('stressDisplay');
+
+    const sliderHrVal = document.getElementById('sliderHrVal');
+    const sliderSleepVal = document.getElementById('sliderSleepVal');
+    const sliderHydrVal = document.getElementById('sliderHydrVal');
+    const sliderStressVal = document.getElementById('sliderStressVal');
+
+    const hydrationProgressBar = document.getElementById('hydrationProgressBar');
+    const stressProgressBar = document.getElementById('stressProgressBar');
+
+    const gravityScoreVal = document.getElementById('gravityScoreVal');
+    const gravityCircle = document.getElementById('gravityCircle');
+    const gravityTier = document.getElementById('gravityTier');
+    const crackStatusText = document.getElementById('crackStatusText');
+    const atrophyText = document.getElementById('atrophyText');
+    const resetTelemetryBtn = document.getElementById('resetTelemetryBtn');
+
+    function calculateGravityScore(hr, sleep, hydr, stress) {
+      // 1. HR Score: Optimal 60-75 bpm. Penalty if too high or too low.
+      let hrScore = 1.0;
+      if (hr < 60) {
+        hrScore = Math.max(0.6, 1.0 - (60 - hr) * 0.02);
+      } else if (hr > 75) {
+        hrScore = Math.max(0.4, 1.0 - (hr - 75) * 0.015);
+      }
+
+      // 2. Sleep Score: Optimal 7.5 - 9.0 hrs.
+      let sleepScore = Math.min(1.0, sleep / 8.0);
+      if (sleep < 5.0) sleepScore = 0.45;
+
+      // 3. Hydration Score: Optimal 2500 - 3200 mL
+      let hydrScore = Math.min(1.0, hydr / 2800);
+
+      // 4. Stress Score: Lower is better (0 to 100)
+      let stressScore = Math.max(0.1, (100 - stress) / 100);
+
+      // Weighted formula for Gravity Score (0.0 to 1.25G)
+      // 30% HR, 25% Sleep, 25% Hydration, 20% Stress
+      const combined = (hrScore * 0.30) + (sleepScore * 0.25) + (hydrScore * 0.25) + (stressScore * 0.20);
+      
+      // Scaling to zero-G training metric: standard Earth is 1.00G, cadet starting is 0.40G, peak is 1.15G
+      let finalG = (combined * 1.15).toFixed(2);
+      return Math.min(1.20, Math.max(0.20, parseFloat(finalG)));
+    }
+
+    function updateTelemetry() {
+      const hr = parseInt(inputHr.value);
+      const sleep = parseFloat(inputSleep.value);
+      const hydr = parseInt(inputHydr.value);
+      const stress = parseInt(inputStress.value);
+
+      // Update Displays
+      hrDisplay.innerText = hr;
+      sleepDisplay.innerText = sleep.toFixed(1);
+      hydrationDisplay.innerText = hydr.toLocaleString();
+      stressDisplay.innerText = stress;
+
+      sliderHrVal.innerText = hr + ' BPM';
+      sliderSleepVal.innerText = sleep.toFixed(1) + ' hrs';
+      sliderHydrVal.innerText = hydr + ' mL';
+      sliderStressVal.innerText = stress + ' IDX';
+
+      // Update bars
+      hydrationProgressBar.style.width = Math.min(100, (hydr / 2800) * 100) + '%';
+      stressProgressBar.style.width = stress + '%';
+
+      // Gravity Calculation
+      const gScore = calculateGravityScore(hr, sleep, hydr, stress);
+      gravityScoreVal.innerText = gScore.toFixed(2);
+
+      // Arc Dashoffset (Circumference = 2 * PI * 64 ~= 402)
+      // 0.2G = 320 offset, 1.2G = 0 offset
+      const ratio = (gScore - 0.2) / (1.2 - 0.2);
+      const clampedRatio = Math.max(0, Math.min(1, ratio));
+      const dashOffset = 402 * (1 - clampedRatio);
+      gravityCircle.style.strokeDashoffset = dashOffset;
+
+      // Tier & Status determination
+      if (gScore >= 1.0) {
+        gravityCircle.style.stroke = '#39FF14'; // Radiant Green
+        gravityTier.className = "text-xs font-bold px-2 py-0.5 mt-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 tracking-wider";
+        gravityTier.innerText = "COMMANDER OVERDRIVE";
+        crackStatusText.innerText = "Tier 5 / Apex Centrifuge";
+        atrophyText.innerText = "99.1% Total Resistance";
+      } else if (gScore >= 0.85) {
+        gravityCircle.style.stroke = '#00F0FF'; // Cyan
+        gravityTier.className = "text-xs font-bold px-2 py-0.5 mt-1 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 tracking-wider";
+        gravityTier.innerText = "ORBITAL LOCK";
+        crackStatusText.innerText = "Tier 4 / Deep Orbit";
+        atrophyText.innerText = "92.4% Efficacy";
+      } else if (gScore >= 0.65) {
+        gravityCircle.style.stroke = '#FFB800'; // Amber
+        gravityTier.className = "text-xs font-bold px-2 py-0.5 mt-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 tracking-wider";
+        gravityTier.innerText = "MICRO-G STABLE";
+        crackStatusText.innerText = "Tier 3 / Stratosphere";
+        atrophyText.innerText = "78.0% Moderate";
+      } else {
+        gravityCircle.style.stroke = '#F43F5E'; // Red/Rose
+        gravityTier.className = "text-xs font-bold px-2 py-0.5 mt-1 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 tracking-wider";
+        gravityTier.innerText = "ATROPHY WARNING";
+        crackStatusText.innerText = "Tier 1 / Critical Deconditioning";
+        atrophyText.innerText = "44.2% Vulnerable";
+      }
+    }
+
+    [inputHr, inputSleep, inputHydr, inputStress].forEach(input => {
+      input.addEventListener('input', updateTelemetry);
+    });
+
+    resetTelemetryBtn.addEventListener('click', () => {
+      inputHr.value = 84;
+      inputSleep.value = 7.6;
+      inputHydr.value = 2450;
+      inputStress.value = 22;
+      updateTelemetry();
+    });
+
+    updateTelemetry();
+  </script>
+</body>
+</html>
